@@ -5,7 +5,8 @@ using System.Text;
 
 namespace Tonesoft.Settings.Tests
 {
-    class Class1
+    public class Class1
     {
+        //123
     }
 }
