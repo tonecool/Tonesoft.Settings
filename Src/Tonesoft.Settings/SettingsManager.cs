@@ -24,6 +24,7 @@ namespace Tonesoft.Settings
             SaveSettings(type);
         }
 
+        //
         private static void LoadSettings(Type type)
         {
             try
