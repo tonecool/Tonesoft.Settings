@@ -6,6 +6,9 @@ using Newtonsoft.Json;
 
 namespace Tonesoft.Settings
 {
+    /// <summary>
+    /// Maing SettingsManager class.
+    /// </summary>
     public class SettingsManager
     {
         private static readonly Dictionary<Type, string> RegisteredTypes = new Dictionary<Type, string>();
@@ -35,6 +38,10 @@ namespace Tonesoft.Settings
             catch (DirectoryNotFoundException) { }
         }
 
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="type"></param>
         public static void SaveSettings(Type type)
         {
             var json = JsonConvert.SerializeObject(Activator.CreateInstance(type), GetSerializerSettings());

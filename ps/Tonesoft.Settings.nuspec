@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Tonesoft.Settings</id>
+    <version>0.0</version>
+    <title>SettingsManager</title>
+    <description>SettingsManager is a high-performance settings framework based on Json.NET serializer</description>
+    <authors>Miloš Tonić</authors>
+    <language>en-US</language>
+    <projectUrl>https://github.com/tonecool/Tonesoft.Settings</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/tonecool/Tonesoft.Settings/master/ps/nugeticon.png</iconUrl>
+    <licenseUrl>https://raw.githubusercontent.com/tonecool/Tonesoft.Settings/master/LICENSE.md</licenseUrl>
+	<dependencies>
+            <dependency id="Newtonsoft.Json" version="6.0.8"/>
+    </dependencies>
+    <tags>settings json</tags>
+  </metadata>
+</package>

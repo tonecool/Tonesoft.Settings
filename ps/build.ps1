@@ -1,10 +1,10 @@
 ﻿properties { 
   $majorVersion = "1.0"
   $majorWithReleaseVersion = "1.0.0"
-  $nugetPrelease = "beta1"
+  $nugetPrelease = "beta4"
   $version = GetVersion $majorWithReleaseVersion
-  $packageId = "Newtonsoft.Json"
-  $signAssemblies = $false
+  $packageId = "Tonesoft.Settings"
+  $signAssemblies = $true
   $signKeyPath = "D:\GDrive\Tone\bp\tonesoft.snk"
   $buildDocumentation = $false
   $buildNuGet = $true
@@ -12,7 +12,8 @@
   $workingName = if ($workingName) {$workingName} else {"Working"}
   
   $baseDir  = resolve-path ..
-  $buildDir = "$baseDir\Build"
+  #$buildDir = "$baseDir\Build"
+  $nuspecDir = "$baseDir\ps"
   $sourceDir = "$baseDir\Src"
   $toolsDir = "$baseDir\Tools"
   $docDir = "$baseDir\Doc"
@@ -20,7 +21,7 @@
   $workingDir = "$baseDir\$workingName"
   $builds = @(
     @{Name = "Tonesoft.Settings"; TestsName = "Tonesoft.Settings.Tests"; TestsFunction = "NUnitTests"; Constants=""; FinalDir="Net40"; NuGetDir = "net40"; Framework="net-4.0"; Sign=$true}
-    #@{Name = "Newtonsoft.Json.Portable"; TestsName = "Newtonsoft.Json.Tests.Portable"; TestsFunction = "NUnitTests"; Constants="PORTABLE"; FinalDir="Portable"; NuGetDir = "portable-net45+wp80+win8+wpa81+dnxcore50"; Framework="net-4.0"; Sign=$true},
+    #@{Name = "Tonesoft.Settings.Portable"; TestsName = "Tonesoft.Settings.Tests.Portable"; TestsFunction = "NUnitTests"; Constants="PORTABLE"; FinalDir="Portable"; NuGetDir = "portable-net45+wp80+win8+wpa81+dnxcore50"; Framework="net-4.0"; Sign=$true},
   )
 }
 
@@ -97,13 +98,13 @@ task Package -depends Build {
 
     New-Item -Path $workingDir\NuGet -ItemType Directory
 
-    $nuspecPath = "$workingDir\NuGet\Newtonsoft.Json.nuspec"
-    Copy-Item -Path "$buildDir\Newtonsoft.Json.nuspec" -Destination $nuspecPath -recurse
+    $nuspecPath = "$workingDir\NuGet\Tonesoft.Settings.nuspec"
+    Copy-Item -Path "$nuspecDir\Tonesoft.Settings.nuspec" -Destination $nuspecPath -recurse
 
     Write-Host "Updating nuspec file at $nuspecPath" -ForegroundColor Green
     Write-Host
 
-    $xml = [xml](Get-Content $nuspecPath)
+    $xml = [xml](Get-Content -Encoding UTF8 $nuspecPath)
     Edit-XmlNodes -doc $xml -xpath "//*[local-name() = 'id']" -value $packageId
     Edit-XmlNodes -doc $xml -xpath "//*[local-name() = 'version']" -value $nugetVersion
 
@@ -112,7 +113,7 @@ task Package -depends Build {
     $xml.save($nuspecPath)
 
     New-Item -Path $workingDir\NuGet\tools -ItemType Directory
-    Copy-Item -Path "$buildDir\install.ps1" -Destination $workingDir\NuGet\tools\install.ps1 -recurse
+    #Copy-Item -Path "$buildDir\install.ps1" -Destination $workingDir\NuGet\tools\install.ps1 -recurse
     
     foreach ($build in $builds)
     {
@@ -124,12 +125,12 @@ task Package -depends Build {
         
         foreach ($frameworkDir in $frameworkDirs)
         {
-          robocopy "$sourceDir\Newtonsoft.Json\bin\Release\$finalDir" $workingDir\NuGet\lib\$frameworkDir *.dll *.pdb *.xml /NFL /NDL /NJS /NC /NS /NP /XO /XF *.CodeAnalysisLog.xml | Out-Default
+          robocopy "$sourceDir\Tonesoft.Settings\bin\Release\$finalDir" $workingDir\NuGet\lib\$frameworkDir *.dll *.pdb *.xml /NFL /NDL /NJS /NC /NS /NP /XO /XF *.CodeAnalysisLog.xml | Out-Default
         }
       }
     }
   
-    robocopy $sourceDir $workingDir\NuGet\src *.cs /S /NFL /NDL /NJS /NC /NS /NP /XD Newtonsoft.Json.Tests Newtonsoft.Json.TestConsole obj | Out-Default
+    robocopy $sourceDir $workingDir\NuGet\src *.cs /S /NFL /NDL /NJS /NC /NS /NP /XD Tonesoft.Settings.Tests Tonesoft.Settings.TestConsole obj | Out-Default
 
     Write-Host "Building NuGet package with ID $packageId and version $nugetVersion" -ForegroundColor Green
     Write-Host
@@ -142,7 +143,7 @@ task Package -depends Build {
   
   if ($buildDocumentation)
   {
-    $mainBuild = $builds | where { $_.Name -eq "Newtonsoft.Json" } | select -first 1
+    $mainBuild = $builds | where { $_.Name -eq "Tonesoft.Settings" } | select -first 1
     $mainBuildFinalDir = $mainBuild.FinalDir
     $documentationSourcePath = "$workingDir\Package\Bin\$mainBuildFinalDir"
     $docOutputPath = "$workingDir\Documentation\"
@@ -155,14 +156,14 @@ task Package -depends Build {
     move -Path $workingDir\Documentation\LastBuild.log -Destination $workingDir\Documentation.log
   }
   
-  Copy-Item -Path $docDir\readme.txt -Destination $workingDir\Package\
+  #Copy-Item -Path $docDir\readme.txt -Destination $workingDir\Package\
   Copy-Item -Path $docDir\license.txt -Destination $workingDir\Package\
 
   # exclude package directories but keep packages\repositories.config
   $packageDirs = gci $sourceDir\packages | where {$_.PsIsContainer} | Select -ExpandProperty Name
 
   robocopy $sourceDir $workingDir\Package\Source\Src /MIR /NFL /NDL /NJS /NC /NS /NP /XD bin obj TestResults AppPackages $packageDirs /XF *.suo *.user | Out-Default
-  robocopy $buildDir $workingDir\Package\Source\Build /MIR /NFL /NDL /NJS /NC /NS /NP /XF runbuild.txt | Out-Default
+  #robocopy $buildDir $workingDir\Package\Source\Build /MIR /NFL /NDL /NJS /NC /NS /NP /XF runbuild.txt | Out-Default
   robocopy $docDir $workingDir\Package\Source\Doc /MIR /NFL /NDL /NJS /NC /NS /NP | Out-Default
   robocopy $toolsDir $workingDir\Package\Source\Tools /MIR /NFL /NDL /NJS /NC /NS /NP | Out-Default
   
@@ -211,4 +212,30 @@ function GetConstants($constants, $includeSigned)
   $signed = switch($includeSigned) { $true { ";SIGNED" } default { "" } }
 
   return "/p:DefineConstants=`"CODE_ANALYSIS;TRACE;$constants$signed`""
+}
+
+function Edit-XmlNodes {
+    param (
+        [xml] $doc,
+        [string] $xpath = $(throw "xpath is a required parameter"),
+        [string] $value = $(throw "value is a required parameter")
+    )
+    
+    $nodes = $doc.SelectNodes($xpath)
+    $count = $nodes.Count
+
+    Write-Host "Found $count nodes with path '$xpath'"
+    
+    foreach ($node in $nodes) {
+        if ($node -ne $null) {
+            if ($node.NodeType -eq "Element")
+            {
+                $node.InnerXml = $value
+            }
+            else
+            {
+                $node.Value = $value
+            }
+        }
+    }
 }
