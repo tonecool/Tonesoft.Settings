@@ -1,7 +1,7 @@
 ﻿properties { 
   $majorVersion = "1.0"
   $majorWithReleaseVersion = "1.0.0"
-  $nugetPrelease = "beta4"
+  $nugetPrelease = "beta10"
   $version = GetVersion $majorWithReleaseVersion
   $packageId = "Tonesoft.Settings"
   $signAssemblies = $true
@@ -131,6 +131,8 @@ task Package -depends Build {
     }
   
     robocopy $sourceDir $workingDir\NuGet\src *.cs /S /NFL /NDL /NJS /NC /NS /NP /XD Tonesoft.Settings.Tests Tonesoft.Settings.TestConsole obj | Out-Default
+    #add example class
+    robocopy $sourceDir\Tonesoft.Settings\content $workingDir\NuGet\content *.cs *.pp /S /NFL /NDL /NJS /NC /NS /NP /XD Tonesoft.Settings.Tests Tonesoft.Settings.TestConsole obj | Out-Default
 
     Write-Host "Building NuGet package with ID $packageId and version $nugetVersion" -ForegroundColor Green
     Write-Host
